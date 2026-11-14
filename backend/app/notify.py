@@ -9,6 +9,7 @@ from email.message import EmailMessage
 
 import httpx
 
+from . import mailtpl
 from .config import get_settings
 
 S = get_settings()
@@ -21,7 +22,7 @@ def whatsapp_configured() -> bool:
 
 
 def email_configured() -> bool:
-    return bool(S.smtp_host)
+    return bool(S.brevo_api_key or S.resend_api_key or S.smtp_host)
 
 
 def _outbox(channel: str, to: str, text: str) -> None:
@@ -30,23 +31,52 @@ def _outbox(channel: str, to: str, text: str) -> None:
     log.info("[%s not configured] message queued for %s***", channel, to[:3])
 
 
-def send_email(to: str, subject: str, body: str) -> bool:
+def _split_from(raw: str) -> tuple[str, str]:
+    """'Name <a@b.c>' -> ('Name', 'a@b.c')."""
+    if "<" in raw and raw.rstrip().endswith(">"):
+        name, addr = raw.rsplit("<", 1)
+        return name.strip().strip('"') or "ReSchedule", addr.rstrip(">").strip()
+    return "ReSchedule", raw.strip()
+
+
+def send_email(to: str, subject: str, body: str, html: str | None = None) -> bool:
+    """Send through Brevo or Resend (HTTPS, works on hosts that block SMTP), else SMTP, else the dev outbox."""
     if not to:
         return False
     if not email_configured():
         _outbox("email", to, f"{subject}\n{body}")
         return False
-    msg = EmailMessage()
-    msg["From"], msg["To"], msg["Subject"] = S.mail_from, to, subject
-    msg.set_content(body)
     try:
-        with smtplib.SMTP(S.smtp_host, S.smtp_port, timeout=10) as smtp:
-            smtp.starttls()
-            if S.smtp_user:
-                smtp.login(S.smtp_user, S.smtp_password)
-            smtp.send_message(msg)
+        if S.brevo_api_key:
+            name, addr = _split_from(S.mail_from)
+            payload = {"sender": {"name": name, "email": addr}, "to": [{"email": to}], "subject": subject, "textContent": body}
+            if html:
+                payload["htmlContent"] = html
+            r = httpx.post("https://api.brevo.com/v3/smtp/email", json=payload, timeout=15,
+                           headers={"api-key": S.brevo_api_key, "accept": "application/json"})
+        elif S.resend_api_key:
+            payload = {"from": S.mail_from, "to": [to], "subject": subject, "text": body}
+            if html:
+                payload["html"] = html
+            r = httpx.post("https://api.resend.com/emails", json=payload, timeout=15,
+                           headers={"Authorization": f"Bearer {S.resend_api_key}"})
+        else:
+            msg = EmailMessage()
+            msg["From"], msg["To"], msg["Subject"] = S.mail_from, to, subject
+            msg.set_content(body)
+            if html:
+                msg.add_alternative(html, subtype="html")
+            with smtplib.SMTP(S.smtp_host, S.smtp_port, timeout=10) as smtp:
+                smtp.starttls()
+                if S.smtp_user:
+                    smtp.login(S.smtp_user, S.smtp_password)
+                smtp.send_message(msg)
+            return True
+        if r.status_code >= 300:
+            log.warning("email send failed: HTTP %s %s", r.status_code, r.text[:200].replace(to, "***"))
+            return False
         return True
-    except (smtplib.SMTPException, OSError) as e:
+    except (smtplib.SMTPException, httpx.HTTPError, OSError) as e:
         log.warning("email send failed: %s", type(e).__name__)
         return False
 
@@ -80,9 +110,8 @@ def send_whatsapp_template(phone: str, template: str, params: list[str], preview
 def send_otp(target: str, code: str, purpose: str) -> bool:
     """Send a one-time code to an email address or an E.164 phone number."""
     if "@" in target:
-        return send_email(target, "Your ReSchedule code",
-                          f"Your ReSchedule code is {code}. It expires in 5 minutes. "
-                          "If you did not ask for it, ignore this message.")
+        subject, html, text = mailtpl.otp_email(code, purpose)
+        return send_email(target, subject, text, html)
     return send_whatsapp_template(target, S.wa_otp_template, [code],
                                   preview=f"Your ReSchedule code is {code}", button_param=code)
 
@@ -93,5 +122,6 @@ def notify_user(user, message: str, link: str) -> bool:
         return send_whatsapp_template(user.phone, S.wa_notify_template, [message, link],
                                       preview=f"{message} {link}")
     if getattr(user, "email", None):
-        return send_email(user.email, "ReSchedule: action needed", f"{message}\n{link}")
+        subject, html, text = mailtpl.approval_email(message, link)
+        return send_email(user.email, subject, text, html)
     return False

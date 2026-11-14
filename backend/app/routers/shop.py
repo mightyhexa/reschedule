@@ -9,7 +9,7 @@ from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
-from .. import demo, notify, services
+from .. import demo, mailtpl, notify, services
 from ..config import get_settings
 from ..db import get_db
 from ..deps import PERMS, audit, clear_auth_cookies, need
@@ -97,7 +97,8 @@ def invite(body: InviteIn, request: Request, user: User = Depends(need("team")),
     if phone:
         notify.send_whatsapp_template(phone, S.wa_notify_template, [msg, S.public_app_url + "/#/login"], preview=msg)
     elif email:
-        notify.send_email(email, "You were added to ReSchedule", msg + "\n" + S.public_app_url + "/#/login")
+        subj, html, text = mailtpl.invite_email(user.name, user.shop.name, S.public_app_url + "/#/login")
+        notify.send_email(email, subj, text, html)
     return _team_out(u)
 
 

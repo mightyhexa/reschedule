@@ -204,7 +204,7 @@ function DisruptionCard({ card, onRan }: { card: any; onRan: (ok: boolean) => vo
             disabled={state === "running"}
             className="mt-3 rounded-full bg-terra px-4 py-2 text-[12.5px] font-medium text-ivory shadow-[0_6px_14px_-8px_rgba(200,100,59,0.9)] transition-transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-60"
           >
-            {state === "running" ? "Solving…" : "⚡ Run 2s repair"}
+            {state === "running" ? "Solving…" : "Run 2s repair"}
           </button>
           {state === "error" && <div className="mt-2 text-[12.5px] text-brick">{err}</div>}
         </>

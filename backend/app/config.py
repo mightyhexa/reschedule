@@ -69,6 +69,8 @@ class Settings:
     wa_otp_template: str = "reschedule_otp"
     wa_notify_template: str = "reschedule_approval"
     wa_lang: str = "en"
+    brevo_api_key: str = ""
+    resend_api_key: str = ""
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_user: str = ""
@@ -132,6 +134,7 @@ def get_settings() -> Settings:
         wa_otp_template=e("WHATSAPP_OTP_TEMPLATE", "reschedule_otp"),
         wa_notify_template=e("WHATSAPP_NOTIFY_TEMPLATE", "reschedule_approval"),
         wa_lang=e("WHATSAPP_LANG", "en"),
+        brevo_api_key=e("BREVO_API_KEY", ""), resend_api_key=e("RESEND_API_KEY", ""),
         smtp_host=e("SMTP_HOST", ""), smtp_port=int(e("SMTP_PORT", "587")),
         smtp_user=e("SMTP_USER", ""), smtp_password=e("SMTP_PASSWORD", ""),
         mail_from=e("MAIL_FROM", "ReSchedule <no-reply@localhost>"),

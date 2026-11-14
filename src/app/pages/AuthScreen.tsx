@@ -156,6 +156,7 @@ export function AuthScreen({ mode: initial }: { mode: Mode }) {
                 {step === "code" ? (
                   <>
                     {info && <Alert tone="sage">{info}</Alert>}
+                    {cfg && !cfg.email && !dev && <Alert tone="amber">Email delivery is not set up on this server yet, so no code can be sent. Please contact the site owner.</Alert>}
                     {dev && <Alert tone="amber">Development mode: your code is <b className="font-mono tracking-widest">{dev}</b>. This is shown only when the server is not in production.</Alert>}
                     <Field label="6-digit code">
                       <Input value={f.code} onChange={set("code")} inputMode="numeric" autoComplete="one-time-code" maxLength={6} autoFocus

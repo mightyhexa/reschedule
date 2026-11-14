@@ -45,7 +45,7 @@ export function Policies() {
   const cardTransforms = [c1Y, c2Y, c3Y, c4Y];
 
   return (
-    <section id="policies" ref={ref} className="mx-auto max-w-6xl px-6 py-28">
+    <section id="policies" ref={ref} className="relative mx-auto max-w-6xl px-6 py-28">
       <div className="grid gap-14 md:grid-cols-[0.8fr_1.2fr]">
         <div className="md:sticky md:top-28 md:self-start">
           <div className="mb-4 flex items-center gap-2.5 font-mono text-xs text-soft">

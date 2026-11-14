@@ -67,7 +67,7 @@ const ITEMS: Item[] = [
       "A spindle motor overheats on Machine 3, stopping the line for four hours.",
     note: "“Machine M3 just tripped. Motor overheated—maintenance says four hours.”",
     backdrop:
-      "https://cdn.shopify.com/s/files/1/0951/3130/4218/files/BG-R.png?v=1761935402&width=800",
+      "radial-gradient(120% 90% at 20% 10%, #B5482F 0%, #6B2A22 45%, #2A1612 100%)",
     facts: [
       ["Affected machine", "M3 (4 hours)"],
       ["Healthy machines", "4 of 5 untouched"],
@@ -88,7 +88,7 @@ const ITEMS: Item[] = [
       "A key customer needs a three-hour replacement part cut on Machine 2 today.",
     note: "“Need Rush Job R on Machine 2 right away—three hours of run time.”",
     backdrop:
-      "https://cdn.shopify.com/s/files/1/0951/3130/4218/files/BG-Y.png?v=1762366719&width=800",
+      "radial-gradient(120% 90% at 80% 10%, #E0A33A 0%, #8A5A22 45%, #2D1E10 100%)",
     facts: [
       ["Target machine", "M2 (+3 hours)"],
       ["Healthy machines", "4 of 5 untouched"],
@@ -109,7 +109,7 @@ const ITEMS: Item[] = [
       "Steel stock for Job E is stuck in transit and will not reach Machine 2 until hour 9.",
     note: "“Bar stock for Job E is delayed—won’t be unloaded until hour nine.”",
     backdrop:
-      "https://cdn.shopify.com/s/files/1/0951/3130/4218/files/BG-B1.png?v=1762365507&width=800",
+      "radial-gradient(120% 90% at 50% 0%, #5E7F8C 0%, #2F4750 45%, #151F24 100%)",
     facts: [
       ["Delayed job", "Job E on M2"],
       ["Smart swap", "Swaps Job E with Job B"],
@@ -417,19 +417,18 @@ function PainterlyCard({
 
         {/* Top Painterly Canvas Plate + Mini Live Preview */}
         <div className="relative h-40 w-full overflow-hidden border-b border-line bg-[#262616]">
-          <img
-            src={item.backdrop}
-            alt=""
-            loading="lazy"
-            className="h-full w-full object-cover opacity-85 transition-transform duration-700 group-hover:scale-105"
+          <div
+            aria-hidden="true"
+            style={{ background: item.backdrop }}
+            className="h-full w-full transition-transform duration-700 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#1D1619]/90 via-[#1D1619]/30 to-transparent" />
 
           {/* Framed Mini Floor Snapshot Floating Inside the Painting */}
           <div className="absolute inset-x-4 bottom-3 rounded-xl border border-white/20 bg-[#1D1619]/85 p-3 text-[#F6F4EC] backdrop-blur-sm">
-            <div className="flex items-center justify-between font-mono text-[10px]">
+            <div className="flex items-center justify-between text-[12px]">
               <span className="text-[#E0A33A]">
-                {item.roman} · {item.time}
+                {item.time}
               </span>
               <span className="text-[#D5F1DA]">
                 {stats.total - stats.stableMoved} locked · {stats.stableMoved}{" "}

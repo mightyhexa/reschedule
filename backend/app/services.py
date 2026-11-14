@@ -282,7 +282,15 @@ def _job_op(ops, base, code, now, machine=None):
 def _order_pair(ops, base, now, p):
     """(first, second, first's placed op): `first` must run before `second`. 422 if it already does."""
     x, y, d = p["job_id"], p.get("other_job_id"), p["direction"]
-    ox = _job_op(ops, base, x, now, p.get("machine"))
+    mach = p.get("machine")
+    if y and not mach:  # two jobs can only swap on a machine they both still need: use the first one they share
+        def live_on(code):
+            return {base[o.id].machine: base[o.id].start for o in ops
+                    if o.job == code and o.id in base and base[o.id].end > now}
+        mx, my = live_on(x), live_on(y)
+        shared = sorted(set(mx) & set(my), key=lambda m: mx[m] + my[m])
+        mach = shared[0] if shared else None
+    ox = _job_op(ops, base, x, now, mach)
     if ox is None or ox.id not in base:
         raise HTTPException(422, f"Job {x} is not in the current plan.")
     if y is None:  # "move up / down": the neighbour on the same machine
@@ -294,7 +302,7 @@ def _order_pair(ops, base, now, p):
         if not 0 <= j < len(line):
             raise HTTPException(422, f"{x} is already {'first' if d == 'up' else 'last'} on {base[ox.id].machine}.")
         y = line[j].job
-    oy = _job_op(ops, base, y, now, p.get("machine"))
+    oy = _job_op(ops, base, y, now, mach)
     if oy is None or oy.id not in base:
         raise HTTPException(422, f"Job {y} is not in the current plan.")
     if d in ("before", "up"):

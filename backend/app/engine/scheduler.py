@@ -173,7 +173,7 @@ def solve(jobs: list[JobIn], ops: list[OpIn], machines: list[str], *, now: int =
             ends.append(e)
         j = jobmap[jid]
         if j.due is not None and not (last.id in fixed and fixed[last.id].end <= j.due):
-            tard = m.NewIntVar(0, H, f"t_{jid}")
+            tard = m.NewIntVar(0, H + max(0, -j.due), f"t_{jid}")
             m.Add(tard >= e - j.due)
             terms.append(10 * j.weight * tard)
     mk = m.NewIntVar(0, H, "makespan")

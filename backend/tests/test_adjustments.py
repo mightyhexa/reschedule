@@ -57,7 +57,8 @@ def test_reorder_swap_before_up_down(client):
     r = client.post("/events", json={"event": p["event"], "freeze_min": 0, "at_min": 0})
     assert r.status_code == 200, r.text
     by = plan_ops(r.json())
-    assert min(o["start"] for o in by[b]) <= min(o["start"] for o in by[a])
+    on_m = lambda code: min(o["start"] for o in by[code] if o["machine"] == m)
+    assert on_m(b) <= on_m(a)
     # "move down" by hand, through the structured event
     r = client.post("/events", json={"event": {"type": "reorder", "job_id": a, "direction": "down"}, "freeze_min": 0, "at_min": 0})
     assert r.status_code == 200, r.text
@@ -119,3 +120,14 @@ def test_cannot_take_job_off_its_only_machine_and_unknown_text_gets_options(clie
     assert p["event"].get("type") is None and len(p["options"]) >= 2, p
     for opt in p["options"]:
         assert client.post("/events", json={"event": opt["event"], "freeze_min": 0, "at_min": 0}).status_code in (200, 422)
+
+
+def test_baseline_with_due_dates_already_in_the_past():
+    """Old due dates are simply late; they must never make the model infeasible."""
+    from app.engine.model import JobIn, OpIn
+    from app.engine.scheduler import solve
+    jobs = [JobIn("A", -3000, 1, 0, "x"), JobIn("B", -10, 2, 0, "x")]
+    ops = [OpIn("A#1", "A", 1, ["M1"], 60), OpIn("A#2", "A", 2, ["M1", "M2"], 60),
+           OpIn("B#1", "B", 1, ["M1"], 90), OpIn("B#2", "B", 2, ["M2"], 30)]
+    res = solve(jobs, ops, ["M1", "M2"], time_limit=2, seed=1)
+    assert res.placed and len(res.placed) == 4

@@ -38,7 +38,7 @@ export function Fit() {
     <section
       id="fit"
       ref={sectionRef}
-      className="mx-auto max-w-6xl px-6 py-28"
+      className="relative mx-auto max-w-6xl px-6 py-28"
     >
       <Reveal>
         <div className="flex flex-col justify-between gap-6 border-b border-line pb-10 md:flex-row md:items-end">

@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import notify
+from .. import mailtpl, notify
 from ..config import get_settings
 from ..db import get_db
 from ..deps import audit
@@ -80,7 +80,8 @@ def create(body: PilotIn, request: Request, db: Session = Depends(get_db)) -> di
     db.commit()
     msg = f"New ReSchedule pilot request: {row.name}, {row.shop} ({row.cluster}, {row.machines} machines)."
     if S.admin_notify_email:
-        notify.send_email(S.admin_notify_email, "New pilot request", msg)
+        subj, html, text = mailtpl.pilot_admin_email(msg, S.public_app_url + "/#/app/admin")
+        notify.send_email(S.admin_notify_email, subj, text, html)
     if S.admin_notify_phone:
         notify.send_whatsapp_template(S.admin_notify_phone, S.wa_notify_template, [msg, S.public_app_url + "/#/app/admin"], preview=msg)
     return {"ok": True}

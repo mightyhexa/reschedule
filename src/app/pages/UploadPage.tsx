@@ -160,7 +160,7 @@ export function UploadPage() {
       </Title>
 
       <div className="mb-5 inline-flex rounded-full border border-line bg-cream/60 p-1 text-sm" role="tablist" aria-label="How to add jobs">
-        {([["file", "Upload a file"], ["type", "➕ Type jobs in"]] as const).map(([k, label]) => (
+        {([["file", "Upload a file"], ["type", "Type jobs in"]] as const).map(([k, label]) => (
           <button key={k} role="tab" aria-selected={tab === k} onClick={() => { setTab(k); setRep(null); setErr(null); }}
             className={`rounded-full px-5 py-2 transition-colors ${tab === k ? "bg-ink text-ivory" : "text-soft hover:text-ink"}`}>{label}</button>
         ))}

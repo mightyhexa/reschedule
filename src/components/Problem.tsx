@@ -109,15 +109,6 @@ export function Problem() {
           style={{ scale: artScale }}
           className="gpu-layer pointer-events-none absolute inset-0"
         >
-          <div
-            className="absolute inset-0 opacity-35 mix-blend-luminosity"
-            style={{
-              backgroundImage:
-                'url("https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1800&q=80")',
-              backgroundSize: "cover",
-              backgroundPosition: "center 30%",
-            }}
-          />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_45%,rgba(200,100,59,0.22),rgba(29,22,25,0.88)_58%,#1D1619_90%)]" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#1D1619] via-transparent to-[#1D1619]/90" />
         </motion.div>
@@ -148,7 +139,7 @@ export function Problem() {
                         : "border-white/15 bg-white/[0.04] text-[#ADACA1] hover:border-white/35 hover:text-white"
                     }`}
                   >
-                    {ch.roman} · {ch.time}
+                    {ch.time}
                   </button>
                 );
               })}

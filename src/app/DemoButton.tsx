@@ -54,7 +54,7 @@ export function DemoButton({ variant = "primary", className = "", onUser, label 
     <span className={`inline-flex flex-col items-start gap-1 ${className}`}>
       <button type="button" onClick={open} disabled={busy} data-demo-button
         className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium transition-all duration-300 disabled:cursor-wait disabled:opacity-70 ${styles[variant]}`}>
-        <span aria-hidden>⚡</span>{busy ? "Setting up your workspace…" : label ?? "Open Live Judge Workspace (1-Click)"}
+        {busy ? "Setting up your workspace…" : label ?? "Open the demo workspace"}
       </button>
       {err && <span role="alert" className="text-xs text-brick">{err}</span>}
     </span>
