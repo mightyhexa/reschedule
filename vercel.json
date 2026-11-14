@@ -3,6 +3,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://RENDER-URL-HERE.onrender.com/:path*" }
+    { "source": "/api/:path*", "destination": "https://reschedule-api.onrender.com/:path*" }
   ]
 }
