@@ -79,13 +79,9 @@ export function Hero() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.65, duration: 0.85, ease }}
-            className="mb-8 inline-flex items-center gap-3 rounded-full border border-ink/10 bg-ivory/60 px-4 py-1.5 backdrop-blur-sm"
+            className="mb-6 text-[15px] text-soft"
           >
-            <span className="font-mono text-[11px] text-terra">I — XII</span>
-            <span className="h-3 w-px bg-ink/15" />
-            <span className="text-xs text-soft">
-              Calm schedule recovery for factory floors
-            </span>
+            Schedule repair for CNC job shops
           </motion.div>
 
           <h1 className="h-editorial max-w-4xl text-[46px] text-ink sm:text-[68px] md:text-[84px]">
@@ -154,20 +150,17 @@ export function Hero() {
             className="mt-16 grid w-full max-w-2xl grid-cols-3 border-t border-ink/10 pt-5 text-left"
           >
             {[
-              ["I", "10:00 AM", "25 jobs running on time"],
-              ["II", "10:15 AM", "Machine 3 stops for 4 hours"],
-              ["III", "10:15 AM", "4 jobs slide · 21 stay put"],
-            ].map(([num, time, desc]) => (
+              ["", "10:00 AM", "25 jobs running on time"],
+              ["", "10:15 AM", "Machine 3 stops for 4 hours"],
+              ["", "10:15 AM", "4 jobs slide, 21 stay put"],
+            ].map(([, time, desc]) => (
               <a
-                key={num}
+                key={time + desc}
                 href="#problem"
                 className="group pr-4 transition-opacity hover:opacity-100"
               >
-                <div className="flex items-baseline gap-2 font-mono text-[11px] text-soft">
-                  <span className="text-terra">{num}</span>
-                  <span>{time}</span>
-                </div>
-                <p className="mt-1 text-xs text-ink/80 group-hover:text-ink">
+                <div className="text-[13px] font-medium text-terra">{time}</div>
+                <p className="mt-1 text-[13.5px] text-ink/80 group-hover:text-ink">
                   {desc}
                 </p>
               </a>
