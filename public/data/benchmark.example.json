@@ -1,0 +1,17 @@
+{
+  "status": "example",
+  "generated_at": null,
+  "engine_version": "example-only",
+  "protocol": { "instance_sizes": ["example"], "traces_per_size": 0, "time_budget_s": 2, "seed": 0 },
+  "strategies": [
+    { "id": "fcfs", "label": "FCFS dispatch", "metrics": { "on_time_pct": 50, "moved_pct": 10, "changeover_min": 100, "energy_cost": 100, "replan_s": 0.01, "recovery_min": 100 } },
+    { "id": "edd", "label": "EDD dispatch", "metrics": { "on_time_pct": 55, "moved_pct": 10, "changeover_min": 100, "energy_cost": 100, "replan_s": 0.01, "recovery_min": 100 } },
+    { "id": "right_shift", "label": "Right-shift", "metrics": { "on_time_pct": 52, "moved_pct": 5, "changeover_min": 100, "energy_cost": 100, "replan_s": 0.01, "recovery_min": 100 } },
+    { "id": "global_cpsat", "label": "Global CP-SAT re-solve", "metrics": { "on_time_pct": 60, "moved_pct": 60, "changeover_min": 100, "energy_cost": 100, "replan_s": 2, "recovery_min": 100 } },
+    { "id": "reschedule", "label": "ReSchedule", "metrics": { "on_time_pct": 58, "moved_pct": 15, "changeover_min": 100, "energy_cost": 100, "replan_s": 2, "recovery_min": 100 } }
+  ],
+  "frontier": [
+    { "lambda": 0, "on_time_pct": 60, "energy_cost": 100, "changeover_min": 100, "moved_pct": 60 },
+    { "lambda": 1, "on_time_pct": 58, "energy_cost": 98, "changeover_min": 98, "moved_pct": 15 }
+  ]
+}

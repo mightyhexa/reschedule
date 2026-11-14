@@ -1,0 +1,54 @@
+# Production stack: Caddy (HTTPS) -> nginx (site + /api proxy) -> API -> PostgreSQL.
+# 1) cp deploy/compose.env.example .env     and fill DOMAIN, DB_PASSWORD
+# 2) cp deploy/backend.env.prod.example backend/.env.prod   and fill the secrets
+# 3) docker compose up -d --build
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: reschedule
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      POSTGRES_DB: reschedule
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reschedule -d reschedule"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  api:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    env_file: ./backend/.env.prod
+    environment:
+      ENV: prod
+      DATABASE_URL: postgresql+psycopg://reschedule:${DB_PASSWORD}@db:5432/reschedule
+      TRUST_PROXY: "1"        # nginx puts the real visitor address in X-Forwarded-For
+      COOKIE_PATH_PREFIX: /api
+      BENCHMARK_PATH: /data/benchmark.json   # DuckMama quotes numbers from this measured file
+    expose: ["8000"]
+    volumes: ["./public/data:/data:ro"]
+  web:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.web
+    restart: unless-stopped
+    depends_on: [api]
+    expose: ["80"]
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [web]
+    ports: ["80:80", "443:443", "443:443/udp"]
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

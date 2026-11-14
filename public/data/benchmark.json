@@ -1,0 +1,312 @@
+{
+  "status": "measured",
+  "generated_at": "2026-11-10T09:59:33Z",
+  "engine_version": "0.2.0",
+  "protocol": {
+    "instance_sizes": [
+      "10 jobs / 5 machines",
+      "30 jobs / 10 machines",
+      "60 jobs / 15 machines"
+    ],
+    "traces_per_size": 30,
+    "time_budget_s": 2.0,
+    "seed": 42
+  },
+  "headline_size": "30 jobs / 10 machines",
+  "strategies": [
+    {
+      "id": "fcfs",
+      "label": "FCFS dispatch",
+      "metrics": {
+        "on_time_pct": 72.28,
+        "moved_pct": 97.63,
+        "changeover_min": 324.33,
+        "energy_cost": 9105.07,
+        "replan_s": 0.0,
+        "recovery_min": 849
+      }
+    },
+    {
+      "id": "edd",
+      "label": "EDD dispatch",
+      "metrics": {
+        "on_time_pct": 86.88,
+        "moved_pct": 98.03,
+        "changeover_min": 323.33,
+        "energy_cost": 9073.2,
+        "replan_s": 0.0,
+        "recovery_min": 862.7
+      }
+    },
+    {
+      "id": "right_shift",
+      "label": "Right-shift",
+      "metrics": {
+        "on_time_pct": 92.15,
+        "moved_pct": 32.72,
+        "changeover_min": 340.33,
+        "energy_cost": 8582.9,
+        "replan_s": 0.0,
+        "recovery_min": 535.33
+      }
+    },
+    {
+      "id": "global_cpsat",
+      "label": "Global CP-SAT re-solve",
+      "metrics": {
+        "on_time_pct": 99.67,
+        "moved_pct": 90.9,
+        "changeover_min": 339.67,
+        "energy_cost": 8511.87,
+        "replan_s": 0.52,
+        "recovery_min": 431.57
+      }
+    },
+    {
+      "id": "reschedule",
+      "label": "ReSchedule",
+      "metrics": {
+        "on_time_pct": 98.92,
+        "moved_pct": 11.1,
+        "changeover_min": 340.67,
+        "energy_cost": 8550.83,
+        "replan_s": 0.26,
+        "recovery_min": 539.23
+      }
+    }
+  ],
+  "by_size": {
+    "10 jobs / 5 machines": [
+      {
+        "id": "fcfs",
+        "label": "FCFS dispatch",
+        "metrics": {
+          "on_time_pct": 77.84,
+          "moved_pct": 95.52,
+          "changeover_min": 105.67,
+          "energy_cost": 3193.47,
+          "replan_s": 0.0,
+          "recovery_min": 551.73
+        }
+      },
+      {
+        "id": "edd",
+        "label": "EDD dispatch",
+        "metrics": {
+          "on_time_pct": 95.51,
+          "moved_pct": 94.6,
+          "changeover_min": 111.67,
+          "energy_cost": 3176.3,
+          "replan_s": 0.0,
+          "recovery_min": 537
+        }
+      },
+      {
+        "id": "right_shift",
+        "label": "Right-shift",
+        "metrics": {
+          "on_time_pct": 92.91,
+          "moved_pct": 36.29,
+          "changeover_min": 116.67,
+          "energy_cost": 3152.33,
+          "replan_s": 0.0,
+          "recovery_min": 370.27
+        }
+      },
+      {
+        "id": "global_cpsat",
+        "label": "Global CP-SAT re-solve",
+        "metrics": {
+          "on_time_pct": 99.39,
+          "moved_pct": 75.27,
+          "changeover_min": 114,
+          "energy_cost": 3152.33,
+          "replan_s": 0.01,
+          "recovery_min": 311.5
+        }
+      },
+      {
+        "id": "reschedule",
+        "label": "ReSchedule",
+        "metrics": {
+          "on_time_pct": 98.18,
+          "moved_pct": 17.62,
+          "changeover_min": 113.67,
+          "energy_cost": 3152.33,
+          "replan_s": 0.02,
+          "recovery_min": 368.77
+        }
+      }
+    ],
+    "30 jobs / 10 machines": [
+      {
+        "id": "fcfs",
+        "label": "FCFS dispatch",
+        "metrics": {
+          "on_time_pct": 72.28,
+          "moved_pct": 97.63,
+          "changeover_min": 324.33,
+          "energy_cost": 9105.07,
+          "replan_s": 0.0,
+          "recovery_min": 849
+        }
+      },
+      {
+        "id": "edd",
+        "label": "EDD dispatch",
+        "metrics": {
+          "on_time_pct": 86.88,
+          "moved_pct": 98.03,
+          "changeover_min": 323.33,
+          "energy_cost": 9073.2,
+          "replan_s": 0.0,
+          "recovery_min": 862.7
+        }
+      },
+      {
+        "id": "right_shift",
+        "label": "Right-shift",
+        "metrics": {
+          "on_time_pct": 92.15,
+          "moved_pct": 32.72,
+          "changeover_min": 340.33,
+          "energy_cost": 8582.9,
+          "replan_s": 0.0,
+          "recovery_min": 535.33
+        }
+      },
+      {
+        "id": "global_cpsat",
+        "label": "Global CP-SAT re-solve",
+        "metrics": {
+          "on_time_pct": 99.67,
+          "moved_pct": 90.9,
+          "changeover_min": 339.67,
+          "energy_cost": 8511.87,
+          "replan_s": 0.52,
+          "recovery_min": 431.57
+        }
+      },
+      {
+        "id": "reschedule",
+        "label": "ReSchedule",
+        "metrics": {
+          "on_time_pct": 98.92,
+          "moved_pct": 11.1,
+          "changeover_min": 340.67,
+          "energy_cost": 8550.83,
+          "replan_s": 0.26,
+          "recovery_min": 539.23
+        }
+      }
+    ],
+    "60 jobs / 15 machines": [
+      {
+        "id": "fcfs",
+        "label": "FCFS dispatch",
+        "metrics": {
+          "on_time_pct": 63.24,
+          "moved_pct": 98.79,
+          "changeover_min": 712.67,
+          "energy_cost": 18904.73,
+          "replan_s": 0.0,
+          "recovery_min": 1266.03
+        }
+      },
+      {
+        "id": "edd",
+        "label": "EDD dispatch",
+        "metrics": {
+          "on_time_pct": 71.43,
+          "moved_pct": 98.76,
+          "changeover_min": 700,
+          "energy_cost": 18935.33,
+          "replan_s": 0.0,
+          "recovery_min": 1304.07
+        }
+      },
+      {
+        "id": "right_shift",
+        "label": "Right-shift",
+        "metrics": {
+          "on_time_pct": 81.36,
+          "moved_pct": 26.23,
+          "changeover_min": 741.33,
+          "energy_cost": 18800.7,
+          "replan_s": 0.0,
+          "recovery_min": 734.8
+        }
+      },
+      {
+        "id": "global_cpsat",
+        "label": "Global CP-SAT re-solve",
+        "metrics": {
+          "on_time_pct": 96.56,
+          "moved_pct": 94.85,
+          "changeover_min": 721.33,
+          "energy_cost": 18641.9,
+          "replan_s": 2.01,
+          "recovery_min": 661.87
+        }
+      },
+      {
+        "id": "reschedule",
+        "label": "ReSchedule",
+        "metrics": {
+          "on_time_pct": 92.24,
+          "moved_pct": 29.8,
+          "changeover_min": 741.67,
+          "energy_cost": 18903.23,
+          "replan_s": 1.86,
+          "recovery_min": 843.73
+        }
+      }
+    ]
+  },
+  "frontier": [
+    {
+      "lambda": 0.0,
+      "on_time_pct": 98.35,
+      "energy_cost": 10171.63,
+      "changeover_min": 386,
+      "moved_pct": 68.54
+    },
+    {
+      "lambda": 0.25,
+      "on_time_pct": 97.79,
+      "energy_cost": 10240.07,
+      "changeover_min": 387.33,
+      "moved_pct": 19.58
+    },
+    {
+      "lambda": 0.5,
+      "on_time_pct": 97.07,
+      "energy_cost": 10262.83,
+      "changeover_min": 390.33,
+      "moved_pct": 19.11
+    },
+    {
+      "lambda": 0.75,
+      "on_time_pct": 97.24,
+      "energy_cost": 10266.07,
+      "changeover_min": 387.67,
+      "moved_pct": 17.47
+    },
+    {
+      "lambda": 1.0,
+      "on_time_pct": 97.4,
+      "energy_cost": 10253.67,
+      "changeover_min": 390.67,
+      "moved_pct": 20.6
+    }
+  ],
+  "notes": {
+    "frontier": "Averaged over 30 traces across all sizes (first 10 per size).",
+    "reschedule": "Repair with a 60-minute frozen horizon and lambda=0.5 (one moved operation is worth 30 weighted lateness minutes).",
+    "recovery_min": "Minutes from the disruption until the last moved or added operation completes.",
+    "energy_cost": "Reported, not optimised: operation hours x 20 kW x tariff (INR 6/kWh, INR 9/kWh from 18:00 to 22:00).",
+    "changeover_min": "Reported, not optimised: 10 minutes whenever consecutive operations on a machine change product family.",
+    "solver": "OR-Tools CP-SAT, 1 worker per solve; the time budget is a limit, not proof of optimality.",
+    "runtime_s": 177
+  }
+}

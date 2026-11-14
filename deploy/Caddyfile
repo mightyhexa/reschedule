@@ -1,0 +1,7 @@
+# Caddy gets and renews the HTTPS certificate by itself. Set DOMAIN in the root .env (for example reschedule.example.com).
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy web:80 {
+		flush_interval -1          # lets DuckMama's streamed answers arrive word by word
+	}
+}
