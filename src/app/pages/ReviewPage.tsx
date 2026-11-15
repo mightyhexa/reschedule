@@ -49,7 +49,7 @@ export function ReviewPage({ id }: { id: string }) {
     setErr(null);
     try {
       await api(`/schedules/${id}/${kind}`, { method: "POST", body: { note } });
-      toast(kind === "approve" ? "Approved. The new plan is now live." : "Rejected. The current plan stays.");
+      toast(kind === "approve" ? "Approved. The new plan is live." : "Rejected. The current plan stays.");
       if (kind === "approve") duckSignal("approved");
       go("/app");
     } catch (e) {
@@ -76,26 +76,26 @@ export function ReviewPage({ id }: { id: string }) {
 
   return (
     <Page>
-      <Title eyebrow={`Version ${s.version} · ${isRepair ? (s.event ? evName[s.event.type] ?? "Disruption" : "Disruption") : "Baseline"}`} title={isRepair ? "Review the proposed fix" : "Review the first plan"}>
+      <Title eyebrow={`Version ${s.version} · ${isRepair ? (s.event ? evName[s.event.type] ?? "Disruption" : "Disruption") : "Baseline"}`} title={isRepair ? "Here is the fix. Check it, then approve." : "Here is your first plan. Check it, then approve."}>
         <Badge tone={tone}>{s.status === "draft" ? "waiting for approval" : s.status}</Badge>
       </Title>
 
       {isRepair && (
         <p className="mb-6 rounded-2xl border border-sage/40 bg-sage/10 px-5 py-3 text-[17px] font-medium text-[#44563A]">
-          {m.on_time_pct?.toFixed(0)}% on time · only {m.moved_ops} job step{m.moved_ops === 1 ? "" : "s"} moved{rs ? ` (pushing everything later would move ${rs.moved_ops})` : ""}
+          {m.late_jobs === 0 ? "Every job still finishes on time." : `${m.on_time_jobs} of ${m.jobs_total} jobs finish on time.`} Only {m.moved_ops} job step{m.moved_ops === 1 ? " moves" : "s move"}{rs ? `, instead of ${rs.moved_ops} if everything were pushed later` : ""}.
         </p>
       )}
       {s.event?.raw_text && <p className="-mt-4 mb-6 max-w-2xl text-soft">“{s.event.raw_text}”</p>}
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="On time after" value={m.on_time_pct} suffix="%" decimals={1} tone="sage" sub={prevOnTime != null ? `was ${prevOnTime.toFixed(1)}%` : `${m.on_time_jobs} of ${m.jobs_total} jobs`} />
+        <Stat label="Finish on time" value={m.on_time_pct} suffix="%" decimals={1} tone="sage" sub={prevOnTime != null ? `was ${prevOnTime.toFixed(1)}%` : `${m.on_time_jobs} of ${m.jobs_total} jobs`} />
         {isRepair ? (
-          <Stat label="Operations moved" value={m.moved_ops} sub={`${m.moved_pct.toFixed(1)}% of the plan${m.added_ops ? ` · ${m.added_ops} added` : ""}`} tone="terra" />
+          <Stat label="Steps that move" value={m.moved_ops} sub={`${m.moved_pct.toFixed(1)}% of the plan${m.added_ops ? ` · ${m.added_ops} added` : ""}`} tone="terra" />
         ) : (
-          <Stat label="Operations" value={s.ops.length} sub={`${m.jobs_total} jobs`} />
+          <Stat label="Job steps" value={s.ops.length} sub={`${m.jobs_total} jobs`} />
         )}
         <Stat label="Late jobs" value={m.late_jobs} tone={m.late_jobs ? "brick" : "sage"} />
-        <Stat label="Fix found in" value={m.solve_s} suffix=" s" decimals={2} sub={fixQuality(m.solver_status)} />
+        <Stat label="Worked out in" value={m.solve_s} suffix=" s" decimals={2} sub={fixQuality(m.solver_status)} />
       </div>
 
       <Card>
@@ -106,7 +106,7 @@ export function ReviewPage({ id }: { id: string }) {
               {(["before", "after"] as const).map((k) => (
                 <button key={k} role="radio" aria-checked={mode === k} onClick={() => setMode(k)} className="relative rounded-full px-5 py-1.5">
                   {mode === k && <motion.span layoutId="seg" className="absolute inset-0 rounded-full bg-ink" transition={{ type: "spring", stiffness: 400, damping: 34 }} />}
-                  <span className={`relative z-10 ${mode === k ? "text-ivory" : "text-soft"}`}>{k === "before" ? "Current plan" : "Proposed"}</span>
+                  <span className={`relative z-10 ${mode === k ? "text-ivory" : "text-soft"}`}>{k === "before" ? "Today" : "With the fix"}</span>
                 </button>
               ))}
             </div>
@@ -119,7 +119,7 @@ export function ReviewPage({ id }: { id: string }) {
       {isRepair && (
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <Card>
-            <h2 className="h-display text-2xl">What changes</h2>
+            <h2 className="h-display text-2xl">What moves</h2>
             {s.moves.length === 0 ? <p className="mt-3 text-soft">Nothing needs to move.</p> : (
               <ul className="mt-4 divide-y divide-line">
                 {s.moves.map((mv, i) => (
@@ -138,16 +138,16 @@ export function ReviewPage({ id }: { id: string }) {
           <div className="grid content-start gap-6">
             {rs && (
               <Card tone="cream">
-                <div className="eyebrow mb-3">Compared with simply pushing every job later</div>
+                <div className="eyebrow mb-3">If you just pushed every job later</div>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><div className="text-soft">This plan</div><div className="h-display text-3xl">{m.on_time_pct?.toFixed(1)}%</div><div className="text-xs text-soft">on time · {m.moved_ops} moved</div></div>
-                  <div><div className="text-soft">Push everything later</div><div className="h-display text-3xl text-soft">{rs.on_time_pct?.toFixed(1)}%</div><div className="text-xs text-soft">on time · {rs.moved_ops} moved</div></div>
+                  <div><div className="text-soft">With this fix</div><div className="h-display text-3xl">{m.on_time_pct?.toFixed(1)}%</div><div className="text-xs text-soft">on time, {m.moved_ops} moved</div></div>
+                  <div><div className="text-soft">Push everything later</div><div className="h-display text-3xl text-soft">{rs.on_time_pct?.toFixed(1)}%</div><div className="text-xs text-soft">on time, {rs.moved_ops} moved</div></div>
                 </div>
               </Card>
             )}
             <Card>
-              <h2 className="h-display text-2xl">Price of the fix</h2>
-              {m.tradeoffs.length === 0 ? <p className="mt-3 text-soft">No job becomes later.</p> : (
+              <h2 className="h-display text-2xl">What it costs</h2>
+              {m.tradeoffs.length === 0 ? <p className="mt-3 text-soft">No job gets later.</p> : (
                 <ul className="mt-4 divide-y divide-line text-sm">
                   {m.tradeoffs.slice(0, 6).map((t) => (
                     <li key={t.job} className="flex justify-between py-2.5"><span className="font-mono">{t.job}</span><Badge tone={t.extra_late_min > 0 ? "brick" : "sage"}>{t.extra_late_min > 0 ? `+${dur(t.extra_late_min)} late` : `${dur(-t.extra_late_min)} earlier`}</Badge></li>
@@ -168,23 +168,23 @@ export function ReviewPage({ id }: { id: string }) {
               <div className="grid gap-4">
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="mr-auto min-w-[200px] flex-1"><Input value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} placeholder="Add a note (optional)" className="!bg-white/5 !text-ivory !border-white/15" /></div>
-                  <Button variant="terra" busy={busy === "approve"} disabled={busy !== ""} onClick={() => decide("approve")}>Approve and publish</Button>
+                  <Button variant="terra" busy={busy === "approve"} disabled={busy !== ""} onClick={() => decide("approve")}>Approve</Button>
                   <Button variant="ghost" className="!border-white/25 !text-ivory hover:!bg-white/10" busy={busy === "reject"} disabled={busy !== ""} onClick={() => decide("reject")}>Reject</Button>
-                  {isRepair && <Button variant="ghost" className="!border-white/25 !text-ivory hover:!bg-white/10" disabled={busy !== ""} onClick={() => setAgain((a) => !a)}>Ask for another plan</Button>}
+                  {isRepair && <Button variant="ghost" className="!border-white/25 !text-ivory hover:!bg-white/10" disabled={busy !== ""} onClick={() => setAgain((a) => !a)}>Try another fix</Button>}
                 </div>
                 <AnimatePresence>
                   {again && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                      <Field label={`Floor calmness: ${stab < 0.34 ? "recover fastest" : stab > 0.66 ? "change as little as possible" : "balanced"}`}>
+                      <Field label={`How much to change: ${stab < 0.34 ? "fix it fastest" : stab > 0.66 ? "touch as little as possible" : "a balance of both"}`}>
                         <input type="range" min={0} max={1} step={0.05} value={stab} onChange={(e) => setStab(Number(e.target.value))} className="accent-[#E0A33A]" />
                       </Field>
-                      <div className="mt-3"><Button variant="terra" small busy={busy === "again"} onClick={regenerate}>Plan again</Button></div>
+                      <div className="mt-3"><Button variant="terra" small busy={busy === "again"} onClick={regenerate}>Find another fix</Button></div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             ) : (
-              <p className="text-sm text-[#D9CDBE]">This plan waits for a manager or the owner to approve it. Nothing changes on the floor until then.</p>
+              <p className="text-sm text-[#D9CDBE]">A manager or the owner needs to approve this. Nothing changes on the floor until they do.</p>
             )}
           </Card>
         </motion.div>

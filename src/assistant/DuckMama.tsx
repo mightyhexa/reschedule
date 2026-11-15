@@ -2,6 +2,7 @@ import { AnimatePresence, motion, useAnimationControls, useReducedMotion, useSpr
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../app/api";
 import { useHashPath } from "../app/router";
+import { VoiceButton } from "../app/Voice";
 import { ambientLine, useBench } from "./ambient";
 import { errorLine, streamChat } from "./chatClient";
 import type { ChatTurn } from "./chatClient";
@@ -592,7 +593,7 @@ export function DuckMama() {
             e.preventDefault();
             send(input);
           }}
-          className={`mb-4 flex items-center gap-1 rounded-full border border-line bg-ivory py-1 pl-3.5 pr-1 shadow-card transition-all duration-300 focus-within:border-terra focus-within:shadow-[0_0_0_3px_rgba(200,100,59,0.16)] ${open ? "flex-1" : "w-[168px]"}`}
+          className={`mb-4 flex items-center gap-1 rounded-full border border-line bg-ivory py-1 pl-3.5 pr-1 shadow-card transition-all duration-300 focus-within:border-terra focus-within:shadow-[0_0_0_3px_rgba(200,100,59,0.16)] ${open ? "flex-1" : "w-[200px]"}`}
         >
           <input
             ref={inputRef}
@@ -608,6 +609,7 @@ export function DuckMama() {
             aria-label="Message DuckMama"
             className="min-w-0 flex-1 bg-transparent py-1.5 text-[13.5px] text-ink outline-none placeholder:text-soft/70"
           />
+          {!busy && <VoiceButton compact onText={(t) => { setInput(""); send(t); }} onError={(m) => say(m)} />}
           <button type="submit" disabled={busy || !input.trim()} aria-label="Send" className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-terra text-ivory transition-all hover:-translate-y-0.5 active:scale-90 disabled:opacity-35">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14M13 6l6 6-6 6" />

@@ -16,11 +16,12 @@ function browserSR(): SR | null {
 let serverFlag: Promise<boolean> | null = null;
 const serverVoice = () => (serverFlag ??= api<{ server: boolean }>("/voice/config").then((r) => !!r.server).catch(() => false));
 
-export function VoiceButton({ onText, hints = "", onError, className = "" }: {
+export function VoiceButton({ onText, hints = "", onError, className = "", compact = false }: {
   onText: (text: string) => void;
   hints?: string;
   onError?: (message: string) => void;
   className?: string;
+  compact?: boolean;
 }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [secs, setSecs] = useState(0);
@@ -140,6 +141,19 @@ export function VoiceButton({ onText, hints = "", onError, className = "" }: {
   if (!supported) return null;
 
   const listening = phase === "listening";
+  if (compact) {
+    return (
+      <button type="button" onClick={toggle} disabled={phase === "working"} aria-pressed={listening}
+        aria-label={listening ? "Stop recording" : "Speak to Mama"} title={listening ? `Listening ${secs}s, tap to stop` : "Speak"}
+        className={`relative grid h-8 w-8 shrink-0 place-items-center rounded-full transition-colors disabled:opacity-50 ${listening ? "bg-brick text-ivory" : "text-soft hover:bg-ink/5 hover:text-ink"} ${className}`}>
+        {listening && <span className="absolute inset-0 animate-ping rounded-full bg-brick/30" aria-hidden="true" />}
+        <svg viewBox="0 0 20 20" className="relative h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+          <rect x="7" y="2.5" width="6" height="10" rx="3" fill={listening ? "currentColor" : "none"} />
+          <path d="M4.5 9.5a5.5 5.5 0 0 0 11 0M10 15v2.5" />
+        </svg>
+      </button>
+    );
+  }
   return (
     <button type="button" onClick={toggle} disabled={phase === "working"} aria-pressed={listening}
       aria-label={listening ? "Stop recording" : "Speak instead of typing"}
