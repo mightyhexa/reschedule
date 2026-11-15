@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from . import notify
 from .config import get_settings
 from .db import Base, engine
-from .routers import admin, assistant, auth, pilot, shop
+from .routers import admin, assistant, auth, pilot, shop, voice
 
 S = get_settings()
 logging.basicConfig(level=logging.INFO)
@@ -57,6 +57,7 @@ app.include_router(pilot.router)
 app.include_router(shop.router)
 app.include_router(admin.router)
 app.include_router(assistant.router)
+app.include_router(voice.router)
 
 if not S.is_prod:
     @app.get("/dev/outbox", include_in_schema=False)

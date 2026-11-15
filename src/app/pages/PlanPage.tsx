@@ -68,23 +68,33 @@ export function PlanPage() {
 
   const m = p.metrics;
   const late = p.jobs.filter((j) => j.late_min > 0);
+  const lateCount = m.late_jobs;
   return (
     <Page>
-      <Title eyebrow={`Version ${p.version} · ${p.kind === "repair" ? "after a disruption" : "baseline"}`} title="Your plan">
+      <Title eyebrow={user?.shop.name} title="Today's plan">
         {drafts.length > 0 && <Button variant="ghost" small onClick={() => go(`/app/review/${drafts[0].id}`)}>{drafts.length} awaiting approval</Button>}
-        {can("plan") && <Button variant="terra" small onClick={() => go("/app/events")}>Report a disruption</Button>}
       </Title>
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {can("plan") && (
+        <Card className="mb-6 !border-terra/30 !bg-terra/[0.06]">
+          <div className="flex flex-wrap items-center justify-between gap-5">
+            <div className="max-w-xl">
+              <h2 className="h-display text-2xl text-ink sm:text-3xl">Something went wrong on the floor?</h2>
+              <p className="mt-1.5 text-soft">Tell me what happened, by typing or speaking. I will show you the smallest change before anything moves.</p>
+            </div>
+            <Button variant="terra" onClick={() => go("/app/events")}>Tell me what happened</Button>
+          </div>
+        </Card>
+      )}
+      <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <Stat label="On time" value={m.on_time_pct} suffix="%" decimals={1} sub={`${m.on_time_jobs} of ${m.jobs_total} jobs`} tone="sage" />
-        <Stat label="Late jobs" value={m.late_jobs} sub={late.length ? "see list below" : "none"} tone={m.late_jobs ? "brick" : undefined} />
-        <Stat label="Steps still to do" value={m.open_ops} sub={`${shop.data?.machines ?? 0} machines`} />
-        <Stat label="Work still ahead" value={Math.round((m.makespan / 60) * 10) / 10} suffix=" h" decimals={1} sub={`ends ${clock(p.origin, m.makespan, true)}`} />
+        <Stat label="Late jobs" value={lateCount} sub={late.length ? "listed below" : "none"} tone={lateCount ? "brick" : undefined} />
+        <Stat label="Everything done by" value={Math.round((m.makespan / 60) * 10) / 10} suffix=" h" decimals={1} sub={`${clock(p.origin, m.makespan, true)}, ${shop.data?.machines ?? 0} machines`} />
       </div>
-      {can("plan") && <QuickAdjust ops={p.ops} />}
+      <p className="mb-6 text-sm text-soft">Plan version {p.version}, {p.kind === "repair" ? "made after a disruption" : "the first plan"}.</p>
       <Card>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="h-display text-2xl">Machines and time</h2>
-          <Badge tone="soft">ends {clock(p.origin, m.makespan, true)} · {dur(m.makespan)} of work</Badge>
+          <Badge tone="soft">Ends {clock(p.origin, m.makespan, true)}, {dur(m.makespan)} of work</Badge>
         </div>
         <PlanGantt ops={p.ops} windows={p.windows} origin={p.origin} nowMin={p.now_min} mode="after" />
         <Legend moved={false} />
@@ -101,6 +111,12 @@ export function PlanPage() {
             ))}
           </ul>
         </Card>
+      )}
+      {can("plan") && (
+        <details className="group mt-8 rounded-2xl border border-line bg-cream/40 px-5 py-4">
+          <summary className="cursor-pointer text-sm font-medium text-ink">Adjust by hand: change the order, add a gap or move a job</summary>
+          <div className="mt-4"><QuickAdjust ops={p.ops} /></div>
+        </details>
       )}
     </Page>
   );
@@ -138,9 +154,9 @@ function QuickAdjust({ ops }: { ops: PlacedOp[] }) {
   }
   if (jobs.length === 0) return null;
   return (
-    <Card className="mb-6 !p-4">
+    <Card className="!p-4">
       <div className="flex flex-wrap items-end gap-3 text-sm">
-        <div className="eyebrow w-full">Quick adjust: change the order, add a gap or move a job, then approve</div>
+        <div className="w-full text-sm text-soft">Pick a job and what to change. You preview the result before approving.</div>
         <label className="grid gap-1"><span className="text-xs text-soft">Job</span>
           <select className={inputCls} value={job} onChange={(e) => setJob(e.target.value)}>{jobs.map((j) => <option key={j}>{j}</option>)}</select></label>
         <div className="inline-flex flex-wrap rounded-full border border-line bg-cream/60 p-1" role="radiogroup" aria-label="Adjustment">

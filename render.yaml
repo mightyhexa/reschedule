@@ -26,3 +26,13 @@ services:
         value: gemini
       - key: LLM_API_KEY
         sync: false
+      - key: STT_URL
+        value: https://api.groq.com/openai/v1
+      - key: STT_KEY
+        sync: false
+      - key: STT_MODEL
+        value: whisper-large-v3-turbo
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false

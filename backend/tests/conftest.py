@@ -12,7 +12,7 @@ os.environ["DEV_ECHO_OTP"] = "1"
 os.environ["ADMIN_EMAILS"] = "admin@example.com"
 # Tests must never use real services even when backend/.env holds real keys
 for k in ("LLM_PROVIDER", "LLM_API_KEY", "SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD", "WHATSAPP_TOKEN", "WHATSAPP_PHONE_NUMBER_ID",
-          "ADMIN_NOTIFY_EMAIL", "ADMIN_NOTIFY_PHONE", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "TURNSTILE_SECRET", "TURNSTILE_SITE_KEY", "GEMINI_BASE"):
+          "ADMIN_NOTIFY_EMAIL", "ADMIN_NOTIFY_PHONE", "STT_URL", "STT_KEY", "BREVO_API_KEY", "RESEND_API_KEY", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "TURNSTILE_SECRET", "TURNSTILE_SITE_KEY", "GEMINI_BASE"):
     os.environ[k] = ""
 os.environ["ALLOWED_ORIGINS"] = "http://localhost:5173"
 

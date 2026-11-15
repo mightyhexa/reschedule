@@ -6,6 +6,7 @@ import { useAuth } from "../auth";
 import { useApi } from "../hooks";
 import { go } from "../router";
 import { Alert, Badge, Button, Card, Empty, Field, Input, Loading, Page, Title, ease, inputCls } from "../ui";
+import { VoiceButton } from "../Voice";
 
 type EvType = "breakdown" | "absence" | "power_cut" | "material" | "overrun" | "deadline" | "hold" | "rush" | "gap" | "reorder" | "move_machine";
 interface Parsed { options?: { label: string; event: Record<string, any> }[]; event: Record<string, any>; missing: string[]; summary: string; confident: boolean; source?: "rules" | "gemini" }
@@ -38,6 +39,27 @@ const TYPES: { id: EvType; label: string; plain: string }[] = [
   { id: "move_machine", label: "Move job to a machine", plain: "Run a job on a different machine" },
 ];
 const hm = (min: number) => (min >= 60 ? `${Math.floor(min / 60)} h${min % 60 ? ` ${min % 60} min` : ""}` : `${min} min`);
+
+/** The event as one plain sentence, rebuilt from the fields so it always matches what will be sent. */
+function plain(e: Record<string, any>): string {
+  const ms: string[] = e.machines ?? (e.machine ? [e.machine] : []);
+  const who = ms.length ? ms.join(" and ") : "";
+  const d = hm(e.duration_min ?? e.delay_min ?? e.extra_min ?? 0);
+  switch (e.type) {
+    case "breakdown": return `${who || "A machine"} is down for ${d}`;
+    case "absence": return `No operator on ${who || "a machine"} for ${d}`;
+    case "power_cut": return `Power cut for ${d}${who ? ` on ${who}` : " across the whole shop"}`;
+    case "material": return `Material for ${e.job_id} arrives ${d} late`;
+    case "overrun": return `${e.job_id} takes ${d} longer than planned`;
+    case "deadline": return `${e.job_id} is now needed ${hm(Math.abs(e.shift_min ?? 0))} ${(e.shift_min ?? 0) < 0 ? "earlier" : "later"}`;
+    case "hold": return e.cancel ? `Cancel ${e.job_id}` : `Hold ${e.job_id} for ${d}`;
+    case "rush": return `Rush job ${e.job_id} needs ${d}${e.machine ? ` on ${e.machine}` : ""}${e.due_in_min ? `, wanted within ${hm(e.due_in_min)}` : ""}`;
+    case "gap": return `Leave a ${d} gap after ${e.job_id}${e.second_job_id ? ` before ${e.second_job_id}` : ""}${e.machine ? ` on ${e.machine}` : ""}${e.reason ? ` (${e.reason})` : ""}`;
+    case "reorder": return ({ before: `Run ${e.job_id} before ${e.other_job_id}`, after: `Run ${e.job_id} after ${e.other_job_id}`, swap: `Swap ${e.job_id} and ${e.other_job_id}`, up: `Move ${e.job_id} one place earlier`, down: `Move ${e.job_id} one place later` } as Record<string, string>)[e.direction ?? "before"] ?? "Change the job order";
+    case "move_machine": return e.avoid_machine ? `Keep ${e.job_id} off ${e.avoid_machine}` : `Run ${e.job_id} on ${e.machine}`;
+    default: return "";
+  }
+}
 
 function Minutes({ label, value, min, max, step, onChange, hint }: { label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void; hint?: string }) {
   return (
@@ -79,6 +101,7 @@ export function EventsPage() {
   const [busy, setBusy] = useState<"" | "parse" | "solve">("");
   const [options, setOptions] = useState<{ label: string; event: Record<string, any> }[]>([]);
   const [err, setErr] = useState<string | null>(null);
+  const [showList, setShowList] = useState(false);
 
   if (cur.loading || data.loading) return <Loading />;
   if (!can("plan")) return <Alert tone="amber">Your role can view plans but not report disruptions.</Alert>;
@@ -115,6 +138,7 @@ export function EventsPage() {
     }
   }
   const shown: Record<string, any> = Object.keys(ev).length ? ev : start("breakdown");
+  const understood = !!summary && Object.keys(ev).length > 0;
 
   async function parse(t = text) {
     if (t.trim().length < 3) return;
@@ -169,21 +193,24 @@ export function EventsPage() {
 
   return (
     <Page>
-      <Title eyebrow="Step 2" title="Report what broke" />
+      <Title title={understood ? "Is this what happened?" : "What happened?"} />
       <Card>
-        <Field label="Say it in your own words" hint="We turn it into a clear event and show it back to you. Nothing changes until you press the button below, and again when you approve the result.">
-          <textarea className={`${inputCls} min-h-[84px] resize-y`} value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. Lathe-2 broke down for 3 hours" maxLength={500}
-            onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") parse(); }} />
+        <Field label="Tell me in your own words" hint="Type it, or tap Speak and say it. Hindi mixed with English is fine.">
+          <textarea className={`${inputCls} min-h-[104px] resize-y !text-base`} value={text} onChange={(e) => setText(e.target.value)} placeholder={`e.g. ${machines[0] ?? "Lathe-2"} broke down for 3 hours`} maxLength={500}
+            onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey || !e.shiftKey) && e.key === "Enter") { e.preventDefault(); parse(); } }} />
         </Field>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {examplesFor(machines, jobs).map((x) => (
-            <button key={x} onClick={() => { setText(x); parse(x); }} className="rounded-full border border-ink/20 px-3.5 py-1.5 text-xs text-soft transition-colors hover:bg-ink/5 hover:text-ink">{x}</button>
-          ))}
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <VoiceButton hints={[...machines, ...jobs.slice(0, 20)].join(", ")} onError={(m) => setErr(m)} onText={(t) => { setText(t); parse(t); }} />
+          <Button variant={understood ? "ghost" : "terra"} busy={busy === "parse"} disabled={text.trim().length < 3} onClick={() => parse()}>{understood ? "Read it again" : "Continue"}</Button>
         </div>
-        <div className="mt-5 flex flex-wrap items-center gap-3">
-          <Button busy={busy === "parse"} disabled={text.trim().length < 3} onClick={() => parse()}>Read my note</Button>
-          {source === "gemini" && <Badge tone="terra">Read by Gemini, double-check below</Badge>}
-        </div>
+        {!understood && (
+          <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-soft">
+            <span>Or try</span>
+            {examplesFor(machines, jobs).filter((_, i) => [0, 2, 8].includes(i)).map((x) => (
+              <button key={x} onClick={() => { setText(x); parse(x); }} className="rounded-full border border-ink/20 px-3.5 py-1.5 text-[13px] text-ink/80 transition-colors hover:bg-ink/5 hover:text-ink">{x}</button>
+            ))}
+          </div>
+        )}
       </Card>
 
       {err && <div className="mt-5"><Alert tone={summary ? "amber" : "brick"}>{err}</Alert></div>}
@@ -198,11 +225,33 @@ export function EventsPage() {
         </div>
       )}
 
-      <AnimatePresence>
-        <motion.div key="builder" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="mt-6">
+      {understood && (
+        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease }} className="mt-6">
           <Card>
-            <div className="eyebrow mb-2">Or build it by hand</div>
-            <h2 className="h-display text-2xl text-ink">{summary || "What happened, and for how long?"}</h2>
+            <div className="text-sm text-soft">Here is what I understood</div>
+            <p className="h-display mt-2 text-3xl text-ink sm:text-4xl">{plain(shown) || summary}</p>
+            {source === "gemini" && <div className="mt-3"><Badge tone="terra">Read by AI, please double-check</Badge></div>}
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <Button variant="terra" busy={busy === "solve"} onClick={submit}>{busy === "solve" ? "Finding the smallest fix…" : "Yes, find the smallest fix"}</Button>
+              <Button variant="ghost" onClick={() => setShowList((v) => !v)}>{showList ? "Hide details" : "Change details"}</Button>
+              <button type="button" onClick={() => { setEv({}); setSummary(""); setSource(""); setText(""); setErr(null); setShowList(false); }} className="text-sm text-soft underline-offset-4 hover:text-ink hover:underline">Start over</button>
+            </div>
+            <p className="mt-4 text-sm text-soft">Next you will see what moves and what stays put. Nothing changes on the floor until you approve it.</p>
+          </Card>
+        </motion.div>
+      )}
+
+      {!understood && !showList && (
+        <div className="mt-5">
+          <button type="button" onClick={() => setShowList(true)} className="text-sm text-soft underline-offset-4 hover:text-ink hover:underline">Pick from a list of situations instead</button>
+        </div>
+      )}
+
+      <AnimatePresence>
+        {showList && (
+        <motion.div key="builder" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4, ease }} className="mt-6">
+          <Card>
+            <h2 className="h-display text-2xl text-ink">{summary ? "Change the details" : "What happened, and for how long?"}</h2>
             <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4" role="radiogroup" aria-label="Kind of disruption">
               {TYPES.map((t) => (
                 <button key={t.id} role="radio" aria-checked={type === t.id} onClick={() => pickType(t.id)} title={t.plain}
@@ -329,12 +378,15 @@ export function EventsPage() {
               </div>
             </details>
 
-            <div className="mt-6 flex flex-wrap items-center gap-4">
-              <Button variant="terra" busy={busy === "solve"} onClick={submit}>{busy === "solve" ? "Finding the smallest fix…" : "Find the smallest fix"}</Button>
-              <span className="text-xs text-soft">You compare before and after in step 3. Nothing changes on the floor until you approve.</span>
-            </div>
+            {!understood && (
+              <div className="mt-6 flex flex-wrap items-center gap-4">
+                <Button variant="terra" busy={busy === "solve"} onClick={submit}>{busy === "solve" ? "Finding the smallest fix…" : "Find the smallest fix"}</Button>
+                <span className="text-sm text-soft">You compare before and after next. Nothing changes on the floor until you approve.</span>
+              </div>
+            )}
           </Card>
         </motion.div>
+        )}
       </AnimatePresence>
     </Page>
   );

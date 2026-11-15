@@ -69,6 +69,9 @@ class Settings:
     wa_otp_template: str = "reschedule_otp"
     wa_notify_template: str = "reschedule_approval"
     wa_lang: str = "en"
+    stt_url: str = ""
+    stt_key: str = ""
+    stt_model: str = "whisper-large-v3-turbo"
     brevo_api_key: str = ""
     resend_api_key: str = ""
     smtp_host: str = ""
@@ -134,6 +137,7 @@ def get_settings() -> Settings:
         wa_otp_template=e("WHATSAPP_OTP_TEMPLATE", "reschedule_otp"),
         wa_notify_template=e("WHATSAPP_NOTIFY_TEMPLATE", "reschedule_approval"),
         wa_lang=e("WHATSAPP_LANG", "en"),
+        stt_url=e("STT_URL", "").rstrip("/"), stt_key=e("STT_KEY", ""), stt_model=e("STT_MODEL", "whisper-large-v3-turbo"),
         brevo_api_key=e("BREVO_API_KEY", ""), resend_api_key=e("RESEND_API_KEY", ""),
         smtp_host=e("SMTP_HOST", ""), smtp_port=int(e("SMTP_PORT", "587")),
         smtp_user=e("SMTP_USER", ""), smtp_password=e("SMTP_PASSWORD", ""),
